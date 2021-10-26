@@ -1,5 +1,5 @@
 <template>
-  <img alt="Vue logo" src="./assets/logo.png">
+  <h1 class="text-center mt-2">Energy Meter</h1>
   <HelloWorld msg="Welcome to Your Vue.js App"/>
 </template>
 
