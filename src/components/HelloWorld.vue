@@ -2,7 +2,7 @@
   <div class="container">
     <div class="row">
         <div class="col-md-3">
-            <button type="button" class="btn btn-outline-primary" id="buttonPrev" v-on:click="greet" >
+            <button type="button" class="btn btn-outline-primary" id="buttonPrev" v-on:click="selectDate(-1)" >
                 <i class="bi bi-arrow-left-square"></i>
             </button>
             <input type="text" readonly class="form-control align-bottom text-center" id="dateInput" style="display:inline; width:calc(100% - 93px);" >
@@ -48,13 +48,8 @@ Chart.register(...registerables);
 import chartData from './chart-data.js'
 
     var date = DateTime.now();
-    var oldObj = null;
+    var currentScaleButton = null;
     var myChart = null;
-
-    function selectDate(delta) {
-       date = date.plus({ days: delta });
-       selectEvent(oldObj);
-    }
 
 function getData(id, datestr, promise) {
     axios
@@ -71,24 +66,16 @@ function getData(id, datestr, promise) {
 
 export default {
   name: 'HelloWorld',
-  props: {
-    msg: String,
-  },
-  data() {
-    return {
-      info: null
-    }
-  },
   methods: {
    selectEvent: function(obj) {
 
         obj.classList.add("active"); // newly activated tab
         const dateStr = date.toISO().slice(0, 10);
         const scale = obj.getAttribute('data-name');
-        if (oldObj) {
-            oldObj.classList.remove("active") // previous active tab
+        if (currentScaleButton) {
+            currentScaleButton.classList.remove("active") // previous active tab
         }
-        oldObj = obj;
+        currentScaleButton = obj;
 
         getData(scale, dateStr, function(response) {
             let root = response.data;
@@ -99,10 +86,15 @@ export default {
             myChart.options.scales.xAxis.max = root.end;
             myChart.update();
 
-            document.getElementById("dateInput").value = dateStr;
+            document.getElementById("dateInput").value = root.current;
+            document.getElementById("buttonPrev").title = root.prev;
+            document.getElementById("buttonNext").title = root.next;
         });
-   }
-
+   },
+   selectDate: function(delta) {
+       date = date.plus({ days: delta });
+       this.selectEvent(currentScaleButton);
+    }
   },
   mounted() {
     const ctx = document.getElementById('myChart');
