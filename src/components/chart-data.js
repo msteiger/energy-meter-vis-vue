@@ -3,7 +3,6 @@ export const chartData = {
     data: {
       datasets: [
         {
-            label: 'Energy',
             fill: true,
             borderColor: 'rgb(75, 192, 192)',
         }
@@ -21,8 +20,6 @@ export const chartData = {
           }
         },
         yAxis: {
-          min: 0,
-          max: 2000
         }
       },
       plugins: {
