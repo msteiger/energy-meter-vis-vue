@@ -2,10 +2,7 @@ export const chartData = {
     type: 'line',
     data: {
       datasets: [
-        {
-            fill: true,
-            borderColor: 'rgb(75, 192, 192)',
-        }
+        // to be filled later
       ]
     },
     options: {

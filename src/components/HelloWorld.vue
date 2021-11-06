@@ -54,6 +54,7 @@ import { Chart, registerables } from 'chart.js';
 Chart.register(...registerables);
 
 import chartData from './chart-data.js'
+import dataColors from './data-colors.js'
 
 var myChart = null;
 
@@ -101,14 +102,21 @@ export default {
       this.reloadData();
     },
     reloadData: function() {
-        console.log("Loading '" + this.myScale + "' for " + this.myDate);
+        console.log("Loading '" + this.myScale + "' for " + "'" + this.myType + "'" + " on " + this.myDate);
 
         const myThis = this;
 
         getData(this.myScale, this.myType, this.myDate, function(response) {
             let root = response.data;
+            const color = dataColors.get(root.desc.id) || dataColors.get('default');
 
-            myChart.data.labels = [];
+            myChart.data.datasets.length = 0;
+            myChart.data.datasets.push(
+            {
+                fill: true,
+                borderColor: color,
+                backgroundColor: color,
+            });
             myChart.data.datasets[0].label = root.desc.name + ' (' + root.desc.unit + ')';
             myChart.data.datasets[0].data = root.data;
             myChart.options.scales.xAxis.min = root.start;
@@ -131,9 +139,35 @@ export default {
     const ctx = document.getElementById('myChart');
     myChart = new Chart(ctx, chartData);
 
-    axios.get('http://' + host + '/data').then(response => { this.myTypeList = response.data; });
+    axios.get('http://' + host + '/data').then(response => { 
+      this.myTypeList = response.data; 
+      this.myTypeList.push(
+        {
+          "id": "my-power",
+          "name": "Power!",
+          "unit": "W",
+          "min": 0.0,
+          "max": 7500.0
+        },
+        {
+          "id": "my-temperature",
+          "name": "Temperature!",
+          "unit": "°C",
+          "min": 0.0,
+          "max": 100.0
+        }
+        )
+    });
 
     this.reloadData();
   }
 }
 </script>
+
+<!-- Add "scoped" attribute to limit CSS to this component only -->
+<style scoped>
+#buttonPrev:focus, #buttonNext:focus
+{
+    box-shadow: none;
+}
+</style>
