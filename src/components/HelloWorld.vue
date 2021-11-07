@@ -101,29 +101,36 @@ export default {
       this.myType = type;
       this.reloadData();
     },
+    pushData: function(response) {
+      const root = response.data;
+      const color = dataColors.get(root.desc.id) || dataColors.get('default');
+      const idx = myChart.data.datasets.push(
+      {
+          fill: true,
+          borderColor: color,
+          backgroundColor: color,
+      }) - 1;
+      myChart.data.datasets[idx].label = root.desc.name + ' (' + root.desc.unit + ')';
+      myChart.data.datasets[idx].data = root.data;
+      myChart.update();
+    },
     reloadData: function() {
         console.log("Loading '" + this.myScale + "' for " + "'" + this.myType + "'" + " on " + this.myDate);
 
         const myThis = this;
 
-        getData(this.myScale, this.myType, this.myDate, function(response) {
-            let root = response.data;
-            const color = dataColors.get(root.desc.id) || dataColors.get('default');
+        myChart.data.datasets.length = 0;
 
-            myChart.data.datasets.length = 0;
-            myChart.data.datasets.push(
-            {
-                fill: true,
-                borderColor: color,
-                backgroundColor: color,
-            });
-            myChart.data.datasets[0].label = root.desc.name + ' (' + root.desc.unit + ')';
-            myChart.data.datasets[0].data = root.data;
+        const majorUpdateFun = function(response) {
+
+            myThis.pushData(response);
+
+            let root = response.data;
+
             myChart.options.scales.xAxis.min = root.start;
             myChart.options.scales.xAxis.max = root.end;
             myChart.options.scales.yAxis.min = root.desc.min;
             myChart.options.scales.yAxis.max = root.desc.max;
-            myChart.update();
 
             document.getElementById("dateInput").value = root.current;
             document.getElementById("buttonPrev").title = root.prev;
@@ -132,7 +139,20 @@ export default {
             myThis.myDate = root.current;
             myThis.myNext = root.next;
             myThis.myPrev = root.prev;
-        });
+        };
+        
+        if (this.myType === 'my-temperature') {
+          getData(this.myScale, 'heating-kessel', this.myDate, this.pushData);
+          getData(this.myScale, 'temperature', this.myDate, this.pushData);
+          getData(this.myScale, 'heating-boiler', this.myDate, majorUpdateFun);
+        } else
+        if (this.myType === 'my-power') {
+          getData(this.myScale, 'em-power-in-l1', this.myDate, this.pushData);
+          getData(this.myScale, 'em-power-in-l2', this.myDate, this.pushData);
+          getData(this.myScale, 'em-power-in-l3', this.myDate, majorUpdateFun);
+        } else {
+          getData(this.myScale, this.myType, this.myDate, majorUpdateFun);
+        }
     }
   },
   mounted() {
