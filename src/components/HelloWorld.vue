@@ -131,6 +131,7 @@ export default {
             myChart.options.scales.xAxis.max = root.end;
             myChart.options.scales.yAxis.min = root.desc.min;
             myChart.options.scales.yAxis.max = root.desc.max;
+            myChart.update();
 
             document.getElementById("dateInput").value = root.current;
             document.getElementById("buttonPrev").title = root.prev;
